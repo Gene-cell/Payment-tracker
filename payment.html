@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Tracker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18202b;
+      --muted: #687282;
+      --line: #d8dee8;
+      --paper: #f6f8fb;
+      --panel: #ffffff;
+      --navy: #21314d;
+      --green: #16735a;
+      --amber: #9a6200;
+      --red: #b13b47;
+      --blue: #246baf;
+      --shadow: 0 14px 38px rgba(32, 41, 58, .10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(33, 49, 77, .07), rgba(246, 248, 251, 0) 320px),
+        var(--paper);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 3vw, 2.55rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subhead {
+      margin: 8px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .button.secondary {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+    }
+
+    .button.danger {
+      background: var(--red);
+    }
+
+    .icon {
+      width: 1.15em;
+      margin-right: 8px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      min-height: 104px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 12px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      line-height: 1;
+      word-break: break-word;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 800;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(36, 107, 175, .16);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 160px 150px;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: .76rem;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    td {
+      font-size: .93rem;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .amount {
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .chip.paid {
+      background: rgba(22, 115, 90, .12);
+      color: var(--green);
+    }
+
+    .chip.outstanding {
+      background: rgba(177, 59, 71, .12);
+      color: var(--red);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .icon-button:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .empty {
+      padding: 34px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(360px, calc(100% - 36px));
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--navy);
+      color: #fff;
+      box-shadow: var(--shadow);
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 920px) {
+      .topbar {
+        display: grid;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      .stats,
+      .form-grid,
+      .form-actions,
+      .tools {
+        grid-template-columns: 1fr;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Payment Tracker</h1>
+        <p class="subhead"></p>
+      </div>
+      <div class="actions">
+        <button class="button secondary" id="exportBtn" type="button"><span class="icon">↓</span>Export CSV</button>
+        <button class="button danger" id="clearBtn" type="button"><span class="icon">×</span>Clear all</button>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Payment summary">
+      <article class="stat"><span>Total to be paid</span><strong id="totalAmount">TZS 0</strong></article>
+      <article class="stat"><span>Amount paid</span><strong id="paidAmount">TZS 0</strong></article>
+      <article class="stat"><span>Outstanding amount</span><strong id="outstandingAmount">TZS 0</strong></article>
+      <article class="stat"><span>Payee balance</span><strong id="payeeBalanceAmount">TZS 0</strong></article>
+    </section>
+
+    <section class="workspace">
+      <aside class="panel">
+        <div class="panel-header">
+          <h2 id="formTitle">Add payment</h2>
+        </div>
+        <form id="paymentForm">
+          <input id="paymentId" type="hidden">
+          <label>
+            Payee or payer
+            <input id="nameInput" required autocomplete="off" >
+          </label>
+          <label>
+            Description
+            <input id="descriptionInput" required autocomplete="off">
+          </label>
+          <div class="form-grid">
+            <label>
+              Amount to be paid
+              <input id="amountInput" type="number" min="0" step="1" >
+            </label>
+            <label>
+              Amount paid
+              <input id="amountPaidInput" type="number" min="0" step="1" >
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="button" type="submit"><span class="icon">✓</span>Save</button>
+            <button class="button secondary" id="resetBtn" type="button"><span class="icon">↺</span>Reset</button>
+          </div>
+        </form>
+      </aside>
+
+      <section class="panel" aria-labelledby="list-title">
+        <div class="panel-header">
+          <h2 id="list-title">Payments</h2>
+        </div>
+        <div class="tools">
+          <input id="searchInput" type="search" placeholder="Search payments">
+          <select id="statusFilter">
+            <option value="All">All statuses</option>
+            <option value="Paid">Paid</option>
+            <option value="Outstanding">Outstanding</option>
+          </select>
+          <select id="sortInput">
+            <option value="outstanding-desc">Highest outstanding</option>
+            <option value="amount-desc">Highest amount</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Amount to be paid</th>
+                <th>Amount paid</th>
+                <th>Outstanding</th>
+                <th>Payee balance</th>
+                <th aria-label="Actions"></th>
+              </tr>
+            </thead>
+            <tbody id="paymentRows"></tbody>
+          </table>
+          <div class="empty" id="emptyState" hidden>No matching payments yet.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const storageKey = "payment-tracker-records-v1";
+    const amountFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+    const els = {
+      form: document.querySelector("#paymentForm"),
+      paymentId: document.querySelector("#paymentId"),
+      formTitle: document.querySelector("#formTitle"),
+      name: document.querySelector("#nameInput"),
+      description: document.querySelector("#descriptionInput"),
+      amount: document.querySelector("#amountInput"),
+      amountPaid: document.querySelector("#amountPaidInput"),
+      rows: document.querySelector("#paymentRows"),
+      empty: document.querySelector("#emptyState"),
+      search: document.querySelector("#searchInput"),
+      statusFilter: document.querySelector("#statusFilter"),
+      sort: document.querySelector("#sortInput"),
+      totalAmount: document.querySelector("#totalAmount"),
+      paidAmount: document.querySelector("#paidAmount"),
+      outstandingAmount: document.querySelector("#outstandingAmount"),
+      payeeBalanceAmount: document.querySelector("#payeeBalanceAmount"),
+      exportBtn: document.querySelector("#exportBtn"),
+      clearBtn: document.querySelector("#clearBtn"),
+      resetBtn: document.querySelector("#resetBtn"),
+      toast: document.querySelector("#toast")
+    };
+
+    let payments = loadPayments();
+
+    function loadPayments() {
+      try {
+        return (JSON.parse(localStorage.getItem(storageKey)) || []).map(normalizePayment);
+      } catch {
+        return [];
+      }
+    }
+
+    function savePayments() {
+      localStorage.setItem(storageKey, JSON.stringify(payments));
+    }
+
+    function normalizePayment(payment) {
+      const amount = Number(payment.amount) || 0;
+      const amountPaid = payment.amountPaid ?? (payment.status === "Paid" ? amount : 0);
+      return {
+        ...payment,
+        amount,
+        amountPaid: Number(amountPaid) || 0
+      };
+    }
+
+    function paymentStatus(payment) {
+      return payment.amountPaid >= payment.amount ? "Paid" : "Outstanding";
+    }
+
+    function outstandingAmount(payment) {
+      return Math.max(payment.amount - payment.amountPaid, 0);
+    }
+
+    function payeeBalance(payment) {
+      return Math.max(payment.amountPaid - payment.amount, 0);
+    }
+
+    function money(value) {
+      return `TSH ${amountFormat.format(value)}`;
+    }
+
+    function render() {
+      const query = els.search.value.trim().toLowerCase();
+      const status = els.statusFilter.value;
+      const filtered = payments
+        .filter((payment) => {
+          const visibleStatus = paymentStatus(payment);
+          const content = [payment.name, payment.description, visibleStatus].join(" ").toLowerCase();
+          return (status === "All" || visibleStatus === status) && content.includes(query);
+        })
+        .sort(sortPayments);
+
+      renderStats();
+      els.rows.innerHTML = "";
+      els.empty.hidden = filtered.length !== 0;
+
+      filtered.forEach((payment) => {
+        const statusName = paymentStatus(payment);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(payment.name)}</strong></td>
+          <td>${escapeHtml(payment.description)}</td>
+          <td><span class="chip ${statusName.toLowerCase()}">${statusName}</span></td>
+          <td class="amount">${money(payment.amount)}</td>
+          <td class="amount">${money(payment.amountPaid)}</td>
+          <td class="amount">${money(outstandingAmount(payment))}</td>
+          <td class="amount">${money(payeeBalance(payment))}</td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-button" type="button" title="Mark paid" aria-label="Mark paid" data-action="paid" data-id="${payment.id}">✓</button>
+              <button class="icon-button" type="button" title="Edit" aria-label="Edit" data-action="edit" data-id="${payment.id}">✎</button>
+              <button class="icon-button" type="button" title="Delete" aria-label="Delete" data-action="delete" data-id="${payment.id}">×</button>
+            </div>
+          </td>
+        `;
+        els.rows.appendChild(tr);
+      });
+    }
+
+    function renderStats() {
+      const totals = payments.reduce((acc, payment) => {
+        const statusName = paymentStatus(payment);
+        acc.total += payment.amount;
+        acc.paid += payment.amountPaid;
+        if (statusName === "Outstanding") acc.outstanding += outstandingAmount(payment);
+        acc.payeeBalance += payeeBalance(payment);
+        return acc;
+      }, { total: 0, paid: 0, outstanding: 0, payeeBalance: 0 });
+
+      els.totalAmount.textContent = money(totals.total);
+      els.paidAmount.textContent = money(totals.paid);
+      els.outstandingAmount.textContent = money(totals.outstanding);
+      els.payeeBalanceAmount.textContent = money(totals.payeeBalance);
+    }
+
+    function sortPayments(a, b) {
+      const mode = els.sort.value;
+      if (mode === "amount-desc") return Math.abs(b.amount) - Math.abs(a.amount);
+      return outstandingAmount(b) - outstandingAmount(a);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function resetForm() {
+      els.form.reset();
+      els.paymentId.value = "";
+      els.formTitle.textContent = "Add payment";
+      els.name.focus();
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    els.form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const payment = {
+        id: els.paymentId.value || crypto.randomUUID(),
+        name: els.name.value.trim(),
+        description: els.description.value.trim(),
+        amount: Number(els.amount.value),
+        amountPaid: Number(els.amountPaid.value),
+      };
+
+      if (!payment.name || !payment.description || !payment.amount || payment.amountPaid < 0) {
+        showToast("Add a name, description, and amount to be paid.");
+        return;
+      }
+
+      const index = payments.findIndex((item) => item.id === payment.id);
+      if (index >= 0) {
+        payments[index] = payment;
+        showToast("Payment updated.");
+      } else {
+        payments.unshift(payment);
+        showToast("Payment added.");
+      }
+
+      savePayments();
+      resetForm();
+      render();
+    });
+
+    els.rows.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const payment = payments.find((item) => item.id === button.dataset.id);
+      if (!payment) return;
+
+      if (button.dataset.action === "paid") {
+        payment.amountPaid = payment.amount;
+        savePayments();
+        render();
+        showToast("Marked paid.");
+      }
+
+      if (button.dataset.action === "edit") {
+        els.paymentId.value = payment.id;
+        els.name.value = payment.name;
+        els.description.value = payment.description;
+        els.amount.value = payment.amount;
+        els.amountPaid.value = payment.amountPaid;
+        els.formTitle.textContent = "Edit payment";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      if (button.dataset.action === "delete") {
+        payments = payments.filter((item) => item.id !== payment.id);
+        savePayments();
+        render();
+        showToast("Payment deleted.");
+      }
+    });
+
+    els.exportBtn.addEventListener("click", () => {
+      if (!payments.length) {
+        showToast("Nothing to export yet.");
+        return;
+      }
+      const rows = [
+        ["Name", "Description", "Status", "Amount to be paid", "Amount paid", "Outstanding", "Payee balance"],
+        ...payments.map((payment) => [
+          payment.name,
+          payment.description,
+          paymentStatus(payment),
+          payment.amount,
+          payment.amountPaid,
+          outstandingAmount(payment),
+          payeeBalance(payment)
+        ])
+      ];
+      const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "payments.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast("CSV exported.");
+    });
+
+    function csvCell(value) {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+    }
+
+    els.clearBtn.addEventListener("click", () => {
+      if (!payments.length) {
+        showToast("Nothing to clear.");
+        return;
+      }
+      if (!confirm("Clear every tracked payment?")) return;
+      payments = [];
+      savePayments();
+      render();
+      resetForm();
+      showToast("All payments cleared.");
+    });
+
+    [els.search, els.statusFilter, els.sort].forEach((input) => input.addEventListener("input", render));
+    els.resetBtn.addEventListener("click", resetForm);
+
+    resetForm();
+    render();
+  </script>
+</body>
+</html>
